@@ -9,12 +9,13 @@ const generateToken=(userId)=>{
 
 export const registerUser=async(req,res)=>{
     try {
-        const {name,email,password}=req.body
-        if(!name||!email||!password||password.l<8) return res.json({success:false,message:'Fill all the fields!'})
+        const {name,email,password,role='user'}=req.body
+        if(!name||!email||!password||password.length<8) return res.json({success:false,message:'Use a password with at least 8 characters'})
+        if(!['user','owner'].includes(role)) return res.json({success:false,message:'Invalid account type'})
         const userExists=await User.findOne({email})
         if(userExists) return res.json({success:false,message:'User Already Exists!'})
         const hashedpassword=await bcrypt.hash(password,10)
-        const user=await User.create({email,name,password:hashedpassword})
+        const user=await User.create({email,name,password:hashedpassword,role})
         const token=generateToken(user._id)
         return res.json({success:true,token})
     } catch (error) {

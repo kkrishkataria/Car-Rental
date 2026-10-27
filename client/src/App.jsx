@@ -5,21 +5,24 @@ import CarDetails from './pages/CarDetails'
 import Home from './pages/Home'
 import Cars from './pages/Cars'
 import Footer from './components/Footer'
-import MyBookings from './pages/Mybookings'
+import MyBookings from './pages/MyBookings'
 import Layout from './pages/owner/Layout'
 import Dashboard from './pages/owner/Dashboard'
 import AddCar from './pages/owner/AddCar'
 import ManageCars from './pages/owner/ManageCars'
 import ManageBookings from './pages/owner/ManageBookings'
 import Login from './components/Login'
+import {Toaster} from 'react-hot-toast'
+import { UseAppContext } from './context/AppContext'
 
 const App = () => {
-  const [showLogin, setShowLogin] = useState(false)
+  const {showLogin,setShowLogin}=UseAppContext()
   const isOwnerPath = useLocation().pathname.startsWith('/owner')
   return (
     <div>
-      {showLogin&&<Login setShowLogin={setShowLogin}/>}
-      {!isOwnerPath && <Navbar setShowLogin={setShowLogin} />}
+      <Toaster/>
+      {showLogin&&<Login/>}
+      {!isOwnerPath && <Navbar/>}
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/car-details/:id' element={<CarDetails />} />

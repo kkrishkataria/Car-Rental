@@ -1,16 +1,29 @@
 import React, { useState } from 'react'
-import { dummyUserData, ownerMenuLinks, assets } from '../../assets/assets'
+import { ownerMenuLinks, assets } from '../../assets/assets'
 import { useLocation, NavLink } from 'react-router-dom'
+import { UseAppContext } from '../../context/AppContext'
+import toast from 'react-hot-toast'
 
 const Sidebar = () => {
-    const user = dummyUserData
+    const {user,axios,fetchUser} = UseAppContext()
     const location = useLocation()
     const [image, setImage] = useState('')
 
-    const updateImage = () => {
-        if (!image) return
-        user.image = URL.createObjectURL(image)
-        setImage('')
+    const updateImage = async() => {
+        try {
+             const formData=new FormData()
+             formData.append('image',image)
+             const {data}=await axios.post('/api/owner/update-image',formData)
+             if(data){
+                fetchUser()
+                toast.success(data.message)
+                setImage('')
+            }
+            else toast.error(data.message)
+        } catch (error) {
+            toast.error(error.message)
+            
+        }
     }
 
     return (
@@ -46,7 +59,7 @@ const Sidebar = () => {
                 </div>
 
                 <p className='mt-2 text-base text-center'>
-                    {user?.name || 'GreatStack'}
+                    {user?.name || 'Owner'}
                 </p>
 
                 {image && (

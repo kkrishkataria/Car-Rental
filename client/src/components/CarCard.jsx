@@ -1,4 +1,5 @@
 import React from 'react'
+import { motion } from 'motion/react'
 import { assets } from '../assets/assets.js'
 import { useNavigate } from 'react-router-dom'
 
@@ -7,12 +8,18 @@ const CarCard = ({ car }) => {
     const navigate = useNavigate()
 
     return (
-        <div
+        <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            whileHover={{ y: -6, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => {
                 navigate(`/car-details/${car._id}`)
                 scrollTo(0, 0)
             }}
-            className='group rounded-xl overflow-hidden shadow-lg hover:-translate-y-1 transition-all duration-500 cursor-pointer'
+            className='group rounded-xl overflow-hidden shadow-lg bg-white cursor-pointer transition-colors duration-300'
         >
             <div className='relative h-48 overflow-hidden'>
                 <img
@@ -21,9 +28,14 @@ const CarCard = ({ car }) => {
                     className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
                 />
 
-                <p className='absolute top-4 left-4 bg-primary/90 text-white text-xs px-2.5 py-1 rounded-full'>
+                <motion.p
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className='absolute top-4 left-4 bg-primary/90 text-white text-xs px-2.5 py-1 rounded-full'
+                >
                     Available Now
-                </p>
+                </motion.p>
 
                 <div className='absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm text-white px-3 py-2 rounded-lg'>
                     <span className='font-semibold'>
@@ -36,7 +48,7 @@ const CarCard = ({ car }) => {
             <div className='p-4 sm:p-5'>
                 <div className='flex justify-between items-start mb-2'>
                     <div>
-                        <h3 className='text-lg font-medium'>
+                        <h3 className='text-lg font-medium group-hover:text-primary transition-colors'>
                             {car.brand} {car.model}
                         </h3>
 
@@ -84,7 +96,7 @@ const CarCard = ({ car }) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 }
 

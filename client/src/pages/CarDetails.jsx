@@ -1,27 +1,64 @@
 
-import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { dummyCarData, assets } from '../assets/assets'
+import { motion } from 'motion/react'
+import { useParams } from 'react-router-dom'
+import { assets } from '../assets/assets'
 import Loader from '../components/Loader'
+import { UseAppContext } from '../context/AppContext.jsx'
+import toast from 'react-hot-toast'
 
 const CarDetails = () => {
     const { id } = useParams()
-    const navigate = useNavigate()
-    const [car, setCar] = useState(null)
-    const currency = import.meta.env.VITE_CURRENCY
+    const {
+        cars,
+        currency,
+        navigate,
+        axios,
+        user,
+        pickupDate,
+        setPickupDate,
+        returnDate,
+        setReturnDate,
+    } = UseAppContext()
+    const car = cars.find((item) => item._id === id)
+
     const handleSubmit = async (e) => {
         e.preventDefault()
+
+        if (!user) {
+            toast.error('Please log in to book a car')
+            return
+        }
+
+        try {
+            const { data } = await axios.post('/api/bookings/create', {
+                car: id,
+                pickupDate,
+                returnDate,
+            })
+
+            if (data.success) {
+                toast.success(data.message)
+                navigate('/my-bookings')
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
 
-    useEffect(() => {
-        setCar(dummyCarData.find(car => car._id === id) || null)
-    }, [id])
-
     return car ? (
-        <div className='px-6 md:px-16 lg:px-24 xl:px-32 mt-16'>
-
-
-            <button
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className='px-6 md:px-16 lg:px-24 xl:px-32 mt-16'
+        >
+            <motion.button
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                whileHover={{ x: -4 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => navigate(-1)}
                 className='flex items-center gap-2 mb-6 text-gray-500 cursor-pointer'
             >
@@ -31,25 +68,27 @@ const CarDetails = () => {
                     className='rotate-180 opacity-65'
                 />
                 Back to all cars
-            </button>
-
+            </motion.button>
 
             <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12'>
-
-
-                <div className='lg:col-span-2'>
-
-                    <img
+                <motion.div
+                    initial={{ opacity: 0, y: 25 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className='lg:col-span-2'
+                >
+                    <motion.img
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.6 }}
                         src={car.image}
                         alt={`${car.brand} ${car.model}`}
                         className='w-full h-auto md:max-h-100 object-cover rounded-xl mb-6 shadow-md'
                     />
 
                     <div className='space-y-6'>
-
-
                         <div>
-                            <h1 className='text-3xl font-bold'>
+                            <h1 className='text-3xl font-bold text-gray-800'>
                                 {car.brand} {car.model}
                             </h1>
 
@@ -59,7 +98,6 @@ const CarDetails = () => {
                         </div>
 
                         <hr className='border-borderColor my-6' />
-
 
                         <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
                             {[
@@ -80,34 +118,34 @@ const CarDetails = () => {
                                     text: car.location
                                 }
                             ].map(({ icon, text }) => (
-                                <div
+                                <motion.div
                                     key={text}
-                                    className='flex flex-col items-center bg-light p-4 rounded-lg'
+                                    whileHover={{ scale: 1.05, y: -2 }}
+                                    transition={{ duration: 0.2 }}
+                                    className='flex flex-col items-center bg-light p-4 rounded-lg cursor-default border border-transparent hover:border-gray-200'
                                 >
                                     <img
                                         src={icon}
                                         alt=""
                                         className='h-5 mb-2'
                                     />
-                                    <span>{text}</span>
-                                </div>
+                                    <span className='font-medium text-gray-700'>{text}</span>
+                                </motion.div>
                             ))}
                         </div>
 
-
                         <div>
-                            <h2 className='text-xl font-medium mb-3'>
+                            <h2 className='text-xl font-medium mb-3 text-gray-800'>
                                 Description
                             </h2>
 
-                            <p className='text-gray-500'>
+                            <p className='text-gray-500 leading-relaxed'>
                                 {car.description}
                             </p>
                         </div>
 
-
                         <div>
-                            <h2 className='text-xl font-medium mb-3'>
+                            <h2 className='text-xl font-medium mb-3 text-gray-800'>
                                 Features
                             </h2>
 
@@ -119,9 +157,11 @@ const CarDetails = () => {
                                     "Heated Seats",
                                     "Rear View Mirror"
                                 ].map(item => (
-                                    <li
+                                    <motion.li
                                         key={item}
-                                        className='flex items-center text-gray-500'
+                                        whileHover={{ x: 4 }}
+                                        transition={{ duration: 0.2 }}
+                                        className='flex items-center text-gray-600'
                                     >
                                         <img
                                             src={assets.check_icon}
@@ -129,21 +169,20 @@ const CarDetails = () => {
                                             alt=""
                                         />
                                         {item}
-                                    </li>
+                                    </motion.li>
                                 ))}
                             </ul>
                         </div>
-
                     </div>
-                </div>
+                </motion.div>
 
-
-                <form
+                <motion.form
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
                     onSubmit={handleSubmit}
-                    className='shadow-lg h-max sticky top-18 rounded-xl p-6 space-y-6 text-gray-500'
+                    className='shadow-lg h-max sticky top-18 rounded-xl p-6 space-y-6 text-gray-500 bg-white border border-gray-100'
                 >
-
-
                     <p className='flex items-center justify-between text-2xl text-gray-800 font-semibold'>
                         {currency}{car.pricePerDay}
 
@@ -154,9 +193,8 @@ const CarDetails = () => {
 
                     <hr className='border-borderColor my-6' />
 
-
                     <div className='flex flex-col gap-2'>
-                        <label htmlFor="pickup-date">
+                        <label htmlFor="pickup-date" className='font-medium text-gray-700'>
                             Pickup Date
                         </label>
 
@@ -164,15 +202,16 @@ const CarDetails = () => {
                             type="date"
                             id="pickup-date"
                             name="pickupDate"
-                            className='border border-borderColor px-3 py-2 rounded-lg'
+                            value={pickupDate}
+                            onChange={(e) => setPickupDate(e.target.value)}
+                            className='border border-borderColor px-3 py-2 rounded-lg text-gray-600 focus:outline-primary'
                             required
                             min={new Date().toISOString().split('T')[0]}
                         />
                     </div>
 
-
                     <div className='flex flex-col gap-2'>
-                        <label htmlFor="return-date">
+                        <label htmlFor="return-date" className='font-medium text-gray-700'>
                             Return Date
                         </label>
 
@@ -180,28 +219,30 @@ const CarDetails = () => {
                             type="date"
                             id="return-date"
                             name="returnDate"
-                            className='border border-borderColor px-3 py-2 rounded-lg'
+                            value={returnDate}
+                            onChange={(e) => setReturnDate(e.target.value)}
+                            className='border border-borderColor px-3 py-2 rounded-lg text-gray-600 focus:outline-primary'
                             required
                             min={new Date().toISOString().split('T')[0]}
                         />
                     </div>
 
-
-                    <button
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 20 }}
                         type="submit"
-                        className='w-full bg-primary hover:bg-primary-dull transition-all py-3 font-medium text-white rounded-xl cursor-pointer'
+                        className='w-full bg-primary hover:bg-primary-dull transition-all py-3 font-medium text-white rounded-xl cursor-pointer shadow-md'
                     >
                         Book Now
-                    </button>
+                    </motion.button>
 
-                    <p className='text-center text-sm'>
+                    <p className='text-center text-sm text-gray-400'>
                         No credit card required to reserve
                     </p>
-
-                </form>
-
+                </motion.form>
             </div>
-        </div>
+        </motion.div>
     ) : (
         <Loader />
     )

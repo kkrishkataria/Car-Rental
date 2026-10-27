@@ -7,9 +7,12 @@ export const protect=async(req,res,next)=>{
         return res.json({success:false,message:"Not authorized"})
     }
     try {
-        const userId=jwt.decode(token,process.env.JWT_SECRET)
+        const userId=jwt.verify(token,process.env.JWT_SECRET)
         if(!userId) return res.json({success:false,message:"Not authorized"})
         req.user=await User.findById(userId.id).select("-password")
+        if(!req.user) {
+            return res.status(401).json({success:false,message:"User not found"})
+        }
         next()
     } catch (error) {
         console.log(error.message)

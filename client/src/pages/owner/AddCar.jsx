@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { assets } from '../../assets/assets'
-
+import { UseAppContext } from '../../context/AppContext'
+import toast from 'react-hot-toast'
 const AddCar = () => {
-    const currency = import.meta.env.VITE_CURRENCY
+    const { axios, currency } = UseAppContext()
+
 
     const [image, setImage] = useState(null)
 
@@ -18,11 +20,39 @@ const AddCar = () => {
         location: '',
         description: ''
     })
-
+    const [isLoading, setIsLoading] = useState(false)
     const onSubmitHandler = async (e) => {
         e.preventDefault()
-        // Backend submission will be added later
-        console.log({ ...car, image })
+        if (isLoading) return null
+        setIsLoading(true)
+        try {
+            const formData = new FormData()
+            formData.append('image', image)
+            formData.append('carData', JSON.stringify(car))
+            const { data } = await axios.post('/api/owner/add-car', formData)
+            if (data.success) {
+                toast.success(data.message)
+                setImage(null)
+                setCar({
+                    brand: '',
+                    model: '',
+                    year: 0,
+                    pricePerDay: 0,
+                    category: '',
+                    transmission: '',
+                    fuel_type: '',
+                    seating_capacity: 0,
+                    location: '',
+                    description: ''
+                })
+            }
+            else toast.error(data.message)
+        } catch (error) {
+            toast.error(error.message)
+        }
+        finally{
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -38,7 +68,7 @@ const AddCar = () => {
                 onSubmit={onSubmitHandler}
                 className='flex flex-col gap-5 text-gray-500 text-sm mt-6 max-w-xl'
             >
-                {/* Car Image */}
+
                 <div className='flex flex-col gap-2'>
                     <label htmlFor='car-image' className='flex items-center gap-3'>
                         <img
@@ -238,7 +268,7 @@ const AddCar = () => {
                     className='flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dull text-white rounded-md w-fit cursor-pointer'
                 >
                     <img src={assets.tick_icon} alt='' className='w-4' />
-                    List Your Car
+                    {isLoading?'Listing...':'List Your Car'}
                 </button>
             </form>
         </div>

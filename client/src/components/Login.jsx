@@ -1,14 +1,31 @@
 import React from 'react'
+import { UseAppContext } from '../context/AppContext';
+import toast from 'react-hot-toast';
 
-const Login = ({ setShowLogin }) => {
-
+const Login = () => {
+    const {setShowLogin,axios,setToken,navigate}=UseAppContext()
     const [state, setState] = React.useState("login");
     const [name, setName] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
+    const [role, setRole] = React.useState("user");
 
     const onSubmitHandler = async (event) => {
-        event.preventDefault();
+        try {
+            event.preventDefault();
+            const {data}=await axios.post(`api/user/${state}`,{name,email,password,role})
+            if(data.success){
+                navigate('/')
+                setToken(data.token)
+                localStorage.setItem('token',data.token)
+                setShowLogin(false)
+            }
+            else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
 
     return (
@@ -27,17 +44,39 @@ const Login = ({ setShowLogin }) => {
                 </p>
 
                 {state === "register" && (
-                    <div className="w-full">
-                        <p>Name</p>
-                        <input
-                            onChange={(e) => setName(e.target.value)}
-                            value={name}
-                            placeholder="type here"
-                            className="border border-gray-200 rounded w-full p-2 mt-1 outline-blue-500"
-                            type="text"
-                            required
-                        />
-                    </div>
+                    <>
+                        <div className="w-full">
+                            <p>Name</p>
+                            <input
+                                onChange={(e) => setName(e.target.value)}
+                                value={name}
+                                placeholder="type here"
+                                className="border border-gray-200 rounded w-full p-2 mt-1 outline-blue-500"
+                                type="text"
+                                required
+                            />
+                        </div>
+
+                        <div className="w-full">
+                            <p>Account type</p>
+                            <div className="mt-1 grid grid-cols-2 gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setRole('user')}
+                                    className={`rounded border p-2 text-left ${role === 'user' ? 'border-primary bg-primary/10 text-primary' : 'border-gray-200'}`}
+                                >
+                                    Customer
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setRole('owner')}
+                                    className={`rounded border p-2 text-left ${role === 'owner' ? 'border-primary bg-primary/10 text-primary' : 'border-gray-200'}`}
+                                >
+                                    Owner
+                                </button>
+                            </div>
+                        </div>
+                    </>
                 )}
 
                 <div className="w-full">
