@@ -75,7 +75,20 @@ export const getCarById = async (req, res) => {
         const { id } = req.params
         const car = await Car.findById(id)
         if (!car) return res.json({ success: false, message: 'Car not found' })
-        res.json({ success: true, car })
+
+        // Check for any active booking (pending or confirmed) for this car
+        const hasActiveBooking = await Booking.exists({
+            car: id,
+            status: { $in: ['pending', 'confirmed'] }
+        })
+
+        // Override isAvailable if there's an active booking
+        const carData = car.toObject()
+        if (hasActiveBooking) {
+            carData.isAvailable = false
+        }
+
+        res.json({ success: true, car: carData })
     } catch (error) {
         console.log(error.message)
         res.json({ success: false, message: error.message })
