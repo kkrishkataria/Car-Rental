@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { useParams } from 'react-router-dom'
 import { assets } from '../assets/assets'
@@ -9,17 +10,38 @@ import toast from 'react-hot-toast'
 const CarDetails = () => {
     const { id } = useParams()
     const {
-        cars,
         currency,
         navigate,
         axios,
         user,
+        fetchCars,
         pickupDate,
         setPickupDate,
         returnDate,
         setReturnDate,
     } = UseAppContext()
-    const car = cars.find((item) => item._id === id)
+
+    const [car, setCar] = useState(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchCarById = async () => {
+            try {
+                setLoading(true)
+                const { data } = await axios.get(`/api/owner/cars/${id}`)
+                if (data.success) {
+                    setCar(data.car)
+                } else {
+                    toast.error(data.message)
+                }
+            } catch (error) {
+                toast.error(error.message)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchCarById()
+    }, [id])
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -38,6 +60,7 @@ const CarDetails = () => {
 
             if (data.success) {
                 toast.success(data.message)
+                if (fetchCars) fetchCars()   // refresh cars so booked car is removed from listings
                 navigate('/my-bookings')
             } else {
                 toast.error(data.message)
@@ -46,6 +69,8 @@ const CarDetails = () => {
             toast.error(error.message)
         }
     }
+
+    if (loading) return <Loader />
 
     return car ? (
         <motion.div
@@ -176,72 +201,105 @@ const CarDetails = () => {
                     </div>
                 </motion.div>
 
-                <motion.form
-                    initial={{ opacity: 0, x: 30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    onSubmit={handleSubmit}
-                    className='shadow-lg h-max sticky top-18 rounded-xl p-6 space-y-6 text-gray-500 bg-white border border-gray-100'
-                >
-                    <p className='flex items-center justify-between text-2xl text-gray-800 font-semibold'>
-                        {currency}{car.pricePerDay}
-
-                        <span className='text-base text-gray-400 font-normal'>
-                            per day
-                        </span>
-                    </p>
-
-                    <hr className='border-borderColor my-6' />
-
-                    <div className='flex flex-col gap-2'>
-                        <label htmlFor="pickup-date" className='font-medium text-gray-700'>
-                            Pickup Date
-                        </label>
-
-                        <input
-                            type="date"
-                            id="pickup-date"
-                            name="pickupDate"
-                            value={pickupDate}
-                            onChange={(e) => setPickupDate(e.target.value)}
-                            className='border border-borderColor px-3 py-2 rounded-lg text-gray-600 focus:outline-primary'
-                            required
-                            min={new Date().toISOString().split('T')[0]}
-                        />
-                    </div>
-
-                    <div className='flex flex-col gap-2'>
-                        <label htmlFor="return-date" className='font-medium text-gray-700'>
-                            Return Date
-                        </label>
-
-                        <input
-                            type="date"
-                            id="return-date"
-                            name="returnDate"
-                            value={returnDate}
-                            onChange={(e) => setReturnDate(e.target.value)}
-                            className='border border-borderColor px-3 py-2 rounded-lg text-gray-600 focus:outline-primary'
-                            required
-                            min={new Date().toISOString().split('T')[0]}
-                        />
-                    </div>
-
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                        type="submit"
-                        className='w-full bg-primary hover:bg-primary-dull transition-all py-3 font-medium text-white rounded-xl cursor-pointer shadow-md'
+                {car.isAvailable ? (
+                    <motion.form
+                        initial={{ opacity: 0, x: 30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        onSubmit={handleSubmit}
+                        className='shadow-lg h-max sticky top-18 rounded-xl p-6 space-y-6 text-gray-500 bg-white border border-gray-100'
                     >
-                        Book Now
-                    </motion.button>
+                        <p className='flex items-center justify-between text-2xl text-gray-800 font-semibold'>
+                            {currency}{car.pricePerDay}
 
-                    <p className='text-center text-sm text-gray-400'>
-                        No credit card required to reserve
-                    </p>
-                </motion.form>
+                            <span className='text-base text-gray-400 font-normal'>
+                                per day
+                            </span>
+                        </p>
+
+                        <hr className='border-borderColor my-6' />
+
+                        <div className='flex flex-col gap-2'>
+                            <label htmlFor="pickup-date" className='font-medium text-gray-700'>
+                                Pickup Date
+                            </label>
+
+                            <input
+                                type="date"
+                                id="pickup-date"
+                                name="pickupDate"
+                                value={pickupDate}
+                                onChange={(e) => setPickupDate(e.target.value)}
+                                className='border border-borderColor px-3 py-2 rounded-lg text-gray-600 focus:outline-primary'
+                                required
+                                min={new Date().toISOString().split('T')[0]}
+                            />
+                        </div>
+
+                        <div className='flex flex-col gap-2'>
+                            <label htmlFor="return-date" className='font-medium text-gray-700'>
+                                Return Date
+                            </label>
+
+                            <input
+                                type="date"
+                                id="return-date"
+                                name="returnDate"
+                                value={returnDate}
+                                onChange={(e) => setReturnDate(e.target.value)}
+                                className='border border-borderColor px-3 py-2 rounded-lg text-gray-600 focus:outline-primary'
+                                required
+                                min={new Date().toISOString().split('T')[0]}
+                            />
+                        </div>
+
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                            type="submit"
+                            className='w-full bg-primary hover:bg-primary-dull transition-all py-3 font-medium text-white rounded-xl cursor-pointer shadow-md'
+                        >
+                            Book Now
+                        </motion.button>
+
+                        <p className='text-center text-sm text-gray-400'>
+                            No credit card required to reserve
+                        </p>
+                    </motion.form>
+                ) : (
+                    <motion.div
+                        initial={{ opacity: 0, x: 30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className='shadow-lg h-max sticky top-18 rounded-xl p-6 space-y-4 bg-white border border-red-100'
+                    >
+                        <p className='flex items-center justify-between text-2xl text-gray-800 font-semibold'>
+                            {currency}{car.pricePerDay}
+                            <span className='text-base text-gray-400 font-normal'>per day</span>
+                        </p>
+                        <hr className='border-borderColor' />
+                        <div className='flex flex-col items-center gap-3 py-6 text-center'>
+                            <div className='w-14 h-14 rounded-full bg-red-50 flex items-center justify-center'>
+                                <svg xmlns="http://www.w3.org/2000/svg" className='w-7 h-7 text-red-400' fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                </svg>
+                            </div>
+                            <p className='text-lg font-semibold text-gray-700'>Currently Unavailable</p>
+                            <p className='text-sm text-gray-400'>This car has been booked by another customer. Please check back later or browse other available cars.</p>
+                        </div>
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => navigate('/cars')}
+                            className='w-full border border-primary text-primary hover:bg-primary hover:text-white transition-all py-3 font-medium rounded-xl cursor-pointer'
+                        >
+                            Browse Other Cars
+                        </motion.button>
+                    </motion.div>
+                )}
             </div>
+
         </motion.div>
     ) : (
         <Loader />

@@ -56,9 +56,11 @@ export const getOwnerCars = async (req, res) => {
 
 export const getCars = async (req, res) => {
     try {
-        const confirmedBookedCarIds = await Booking.find({ status: "confirmed" }).distinct("car");
+        const bookedCarIds = await Booking.find({
+            status: { $in: ["confirmed", "pending"] }
+        }).distinct("car");
         const cars = await Car.find({
-            _id: { $nin: confirmedBookedCarIds },
+            _id: { $nin: bookedCarIds },
             isAvailable: true
         });
         res.json({ success: true, cars });
@@ -67,6 +69,18 @@ export const getCars = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 };
+
+export const getCarById = async (req, res) => {
+    try {
+        const { id } = req.params
+        const car = await Car.findById(id)
+        if (!car) return res.json({ success: false, message: 'Car not found' })
+        res.json({ success: true, car })
+    } catch (error) {
+        console.log(error.message)
+        res.json({ success: false, message: error.message })
+    }
+}
 
 
 export const toggleCarAvailability = async (req, res) => {
