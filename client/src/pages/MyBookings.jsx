@@ -18,6 +18,8 @@ const MyBookings = () => {
   }, [isOwner, navigate])
 
   useEffect(()=>{
+    if (isOwner) return
+
     let cancelled = false
 
     axios.get('/api/bookings/user')
@@ -36,7 +38,9 @@ const MyBookings = () => {
     return () => {
       cancelled = true
     }
-  },[axios])
+  },[axios, isOwner])
+
+  if (isOwner) return null
 
   return (
     <motion.div
