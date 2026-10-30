@@ -14,9 +14,11 @@ const checkAvalabilityOfDate=async(car,pickupDate,returnDate)=>{
 export const checkAvalabilityOfCar=async(req,res)=>{
     try {
         const {location,pickupDate,returnDate}=req.body
-        const confirmedBookedCarIds = await Booking.find({ status: "confirmed" }).distinct("car");
+        const bookedCarIds = await Booking.find({
+            status: { $in: ["confirmed", "pending"] }
+        }).distinct("car");
         const cars=await Car.find({
-            _id: { $nin: confirmedBookedCarIds },
+            _id: { $nin: bookedCarIds },
             location,
             isAvailable:true
         })
@@ -43,7 +45,8 @@ export const checkAvalabilityOfCar=async(req,res)=>{
 
 export const createBooking=async(req,res)=>{
     try {
-        const {_id}=req.user
+        const {_id, role}=req.user
+        if (role === 'owner') return res.json({ success: false, message: 'Owners cannot book cars.' })
         const {car,pickupDate,returnDate}=req.body
         const isConfirmedBooked = await Booking.exists({ car, status: 'confirmed' });
         if (isConfirmedBooked) return res.json({ success: false, message: 'This car is already confirmed booked!' })

@@ -14,6 +14,7 @@ const CarDetails = () => {
         navigate,
         axios,
         user,
+        isOwner,
         fetchCars,
         pickupDate,
         setPickupDate,
@@ -201,7 +202,37 @@ const CarDetails = () => {
                     </div>
                 </motion.div>
 
-                {car.isAvailable ? (
+                {isOwner ? (
+                    <motion.div
+                        initial={{ opacity: 0, x: 30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className='shadow-lg h-max sticky top-18 rounded-xl p-6 space-y-4 bg-white border border-gray-100'
+                    >
+                        <p className='flex items-center justify-between text-2xl text-gray-800 font-semibold'>
+                            {currency}{car.pricePerDay}
+                            <span className='text-base text-gray-400 font-normal'>per day</span>
+                        </p>
+                        <hr className='border-borderColor' />
+                        <div className='flex flex-col items-center gap-3 py-6 text-center'>
+                            <div className='w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center'>
+                                <svg xmlns="http://www.w3.org/2000/svg" className='w-7 h-7 text-blue-400' fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <p className='text-lg font-semibold text-gray-700'>Owner Account</p>
+                            <p className='text-sm text-gray-400'>Owners cannot book cars. Switch to a customer account to make a booking.</p>
+                        </div>
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => navigate('/owner/dashboard')}
+                            className='w-full border border-primary text-primary hover:bg-primary hover:text-white transition-all py-3 font-medium rounded-xl cursor-pointer'
+                        >
+                            Go to Dashboard
+                        </motion.button>
+                    </motion.div>
+                ) : car.isAvailable ? (
                     <motion.form
                         initial={{ opacity: 0, x: 30 }}
                         animate={{ opacity: 1, x: 0 }}
