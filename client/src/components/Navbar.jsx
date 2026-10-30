@@ -67,23 +67,28 @@ const Navbar = () => {
                     location.pathname === '/' ? "bg-light" : "bg-white"
                 } ${open ? "max-sm:translate-x-0" : "max-sm:translate-x-full"}`}
             >
-                {menuLinks.map((link, index) => (
-                    <motion.div
-                        key={index}
-                        whileHover={{ y: -2 }}
-                        transition={{ duration: 0.15 }}
-                    >
-                        <Link
-                            to={link.path}
-                            onClick={() => setOpen(false)}
-                            className={`transition-colors hover:text-primary ${
-                                location.pathname === link.path ? 'text-primary font-medium' : ''
-                            }`}
+                {menuLinks.map((link, index) => {
+                    const path = link.name === 'My Bookings' && isOwner
+                        ? '/owner/manage-bookings'
+                        : link.path
+                    return (
+                        <motion.div
+                            key={index}
+                            whileHover={{ y: -2 }}
+                            transition={{ duration: 0.15 }}
                         >
-                            {link.name}
-                        </Link>
-                    </motion.div>
-                ))}
+                            <Link
+                                to={path}
+                                onClick={() => setOpen(false)}
+                                className={`transition-colors hover:text-primary ${
+                                    location.pathname === path ? 'text-primary font-medium' : ''
+                                }`}
+                            >
+                                {link.name}
+                            </Link>
+                        </motion.div>
+                    )
+                })}
 
                 {/* Search products form to search car name */}
                 <motion.form

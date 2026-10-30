@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { assets } from '../assets/assets.js'
 import Title from '../components/Title'
@@ -7,7 +8,14 @@ import toast from 'react-hot-toast'
 
 const MyBookings = () => {
   const [bookings,setBookings]=useState([])
-  const { axios, currency } = UseAppContext()
+  const { axios, currency, isOwner } = UseAppContext()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isOwner) {
+      navigate('/owner/manage-bookings', { replace: true })
+    }
+  }, [isOwner, navigate])
 
   useEffect(()=>{
     let cancelled = false
