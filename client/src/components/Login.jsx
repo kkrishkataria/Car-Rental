@@ -16,6 +16,7 @@ const Login = () => {
             const {data}=await axios.post(`api/user/${state}`,{name,email,password,role})
             if(data.success){
                 navigate('/')
+                axios.defaults.headers.common['Authorization']=data.token
                 setToken(data.token)
                 localStorage.setItem('token',data.token)
                 setShowLogin(false)

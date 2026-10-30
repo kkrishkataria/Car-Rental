@@ -27,7 +27,15 @@ export const AppProvider=({children})=>{
                 navigate('/')
             }
         } catch (error) {
-            toast.error(error.message)
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token')
+                setToken(null)
+                setUser(null)
+                setIsOwner(false)
+                axios.defaults.headers.common['Authorization']=''
+            } else {
+                toast.error(error.message)
+            }
         }
 
     }
