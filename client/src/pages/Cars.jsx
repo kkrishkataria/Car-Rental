@@ -30,7 +30,8 @@ const Cars = () => {
 
     useEffect(() => {
         if (fetchCars) fetchCars()
-    }, [])
+        // Re-fetch every time this page is visited so booked cars are excluded
+    }, [fetchCars])
 
     useEffect(() => {
         if (!isSearchData) return undefined

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import {useNavigate} from 'react-router-dom'
 import axios from 'axios'
 import {toast} from 'react-hot-toast'
@@ -32,19 +32,18 @@ export const AppProvider=({children})=>{
 
     }
 
-    const fetchCars=async()=>{
+    const fetchCars = useCallback(async () => {
         try {
-            const {data}=await axios.get('/api/owner/all-cars')
-            if(data.success){
+            const { data } = await axios.get('/api/owner/all-cars')
+            if (data.success) {
                 setCars(data.cars)
-            }
-            else{
+            } else {
                 toast.error(data.message)
             }
         } catch (error) {
             toast.error(error.message)
         }
-    }
+    }, [])
 
     const logout=async()=>{
         localStorage.removeItem('token')
