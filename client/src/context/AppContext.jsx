@@ -5,6 +5,19 @@ import {toast} from 'react-hot-toast'
 
 axios.defaults.baseURL=import.meta.env.VITE_BASE_URL
 
+const initialToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+if (initialToken) {
+    axios.defaults.headers.common['Authorization'] = initialToken
+}
+
+axios.interceptors.request.use((config) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+    if (token) {
+        config.headers.Authorization = token
+    }
+    return config
+})
+
 export const AppContext=createContext()
 export const AppProvider=({children})=>{
     const currency = (import.meta.env.VITE_CURRENCY && import.meta.env.VITE_CURRENCY !== '$') ? import.meta.env.VITE_CURRENCY : '₹'

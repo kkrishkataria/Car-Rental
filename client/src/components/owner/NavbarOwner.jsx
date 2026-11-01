@@ -1,37 +1,39 @@
 import React from 'react'
 import { assets } from '../../assets/assets'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { UseAppContext } from '../../context/AppContext'
+import { motion } from 'motion/react'
 
 const NavbarOwner = () => {
     const { user, logout } = UseAppContext()
-    const location = useLocation()
-    const isActive = location.pathname === '/owner/manage-bookings'
 
     return (
-        <div className='flex items-center justify-between px-6 md:px-10 py-4 text-gray-500 border-b border-borderColor relative transition-all'>
-            <Link to='/'>
-                <img src={assets.logo} alt="" className='h-7' />
+        <div className='flex items-center justify-between px-6 md:px-12 py-4 text-gray-600 border-b border-borderColor bg-white relative transition-all'>
+            <Link to='/' className='flex items-center gap-2'>
+                <img src={assets.logo} alt="Car Rental Logo" className='h-7' />
             </Link>
 
-            <div className='flex items-center gap-6'>
+            <div className='flex items-center gap-5 sm:gap-7'>
                 <Link
-                    to='/owner/manage-bookings'
-                    className={`text-sm font-medium transition-colors hover:text-primary ${
-                        isActive ? 'text-primary' : 'text-gray-600'
-                    }`}
+                    to='/'
+                    className='text-sm font-medium text-gray-600 hover:text-primary transition-colors'
                 >
-                    My Bookings
+                    Browse Cars
                 </Link>
 
-                <p className='text-sm'>Welcome, {user?.name || "Owner"}</p>
+                <p className='text-sm font-medium text-gray-600 hidden sm:block'>
+                    Welcome, <span className='text-gray-900 capitalize'>{user?.name || "Owner"}</span>
+                </p>
 
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
                     onClick={logout}
-                    className='px-3.5 py-1.5 text-xs bg-primary hover:bg-primary-dull text-white rounded-lg transition-all cursor-pointer font-medium'
+                    className="cursor-pointer px-6 py-2 bg-primary hover:bg-primary-dull transition-all text-white rounded-lg font-medium text-sm shadow-xs hover:shadow-md"
                 >
                     Logout
-                </button>
+                </motion.button>
             </div>
         </div>
     )
