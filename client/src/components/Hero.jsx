@@ -8,7 +8,11 @@ const Hero = () => {
     const {navigate,pickupDate,setPickupDate,returnDate,setReturnDate}=UseAppContext()
     const handleSearch=(e)=>{
         e.preventDefault()
-        navigate('/cars?pickupLocation='+pickupLocation+'&pickupDate='+pickupDate+'&returnDate='+returnDate)
+        const params = new URLSearchParams()
+        if (pickupLocation) params.set('pickupLocation', pickupLocation)
+        if (pickupDate) params.set('pickupDate', pickupDate)
+        if (returnDate) params.set('returnDate', returnDate)
+        navigate(`/cars?${params.toString()}`)
     }
 
     return (
@@ -34,7 +38,7 @@ const Hero = () => {
                 onSubmit={handleSearch}
                 className='flex flex-col md:flex-row items-start md:items-center justify-between p-6 rounded-lg md:rounded-full w-full max-w-80 md:max-w-200 bg-white shadow-[0px_8px_20px_rgba(0,0,0,0.1)]'
             >
-                <div className='flex flex-col md:flex-row items-start md:items-center gap-10 min-md:ml-8'>
+                <div className='flex flex-col md:flex-row items-start md:items-center gap-10 md:ml-8'>
                     <motion.div
                         whileHover={{ scale: 1.02 }}
                         className='flex flex-col items-start gap-2'
@@ -79,7 +83,7 @@ const Hero = () => {
                             onChange={(e)=>setReturnDate(e.target.value)}
                             type="date"
                             id="return-date"
-                            min={new Date().toISOString().split('T')[0]}
+                            min={pickupDate || new Date().toISOString().split('T')[0]}
                             className='text-sm text-gray-500'
                             required
                         />

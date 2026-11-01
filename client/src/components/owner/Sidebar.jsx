@@ -8,6 +8,19 @@ const Sidebar = () => {
     const {user,axios,fetchUser} = UseAppContext()
     const location = useLocation()
     const [image, setImage] = useState('')
+    const [previewUrl, setPreviewUrl] = useState('')
+
+    useEffect(() => {
+        if (!image) {
+            setPreviewUrl('')
+            return
+        }
+        const url = URL.createObjectURL(image)
+        setPreviewUrl(url)
+        return () => {
+            URL.revokeObjectURL(url)
+        }
+    }, [image])
 
     const updateImage = async() => {
         try {
@@ -35,8 +48,8 @@ const Sidebar = () => {
                     <label htmlFor="image" className='cursor-pointer'>
                         <img
                             src={
-                                image
-                                    ? URL.createObjectURL(image)
+                                previewUrl
+                                    ? previewUrl
                                     : user?.image ||
                                       'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=300'
                             }

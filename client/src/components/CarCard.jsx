@@ -25,6 +25,7 @@ const CarCard = ({ car }) => {
                 <img
                     src={car.image}
                     alt="Car Image"
+                    loading="lazy"
                     className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
                 />
 

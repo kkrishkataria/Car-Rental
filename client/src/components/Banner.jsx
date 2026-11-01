@@ -1,8 +1,23 @@
 import React from 'react'
 import { motion } from 'motion/react'
 import { assets } from '../assets/assets'
+import { useNavigate } from 'react-router-dom'
+import { UseAppContext } from '../context/AppContext'
+import toast from 'react-hot-toast'
 
 const Banner = () => {
+  const navigate = useNavigate()
+  const { user, isOwner, setShowLogin } = UseAppContext()
+
+  const handleListCar = () => {
+    if (isOwner) {
+      navigate('/owner/add-car')
+    } else if (user) {
+      toast('Switch or sign in with an owner account to list cars')
+    } else {
+      setShowLogin(true)
+    }
+  }
   return (
     <motion.div
       initial={{ opacity: 0, y: 35, scale: 0.98 }}
@@ -29,6 +44,7 @@ const Banner = () => {
         </p>
 
         <motion.button
+          onClick={handleListCar}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.94 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}

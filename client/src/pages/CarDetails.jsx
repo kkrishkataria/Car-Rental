@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { useParams } from 'react-router-dom'
@@ -24,6 +23,7 @@ const CarDetails = () => {
 
     const [car, setCar] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [isBooking, setIsBooking] = useState(false)
 
     useEffect(() => {
         const fetchCarById = async () => {
@@ -42,7 +42,7 @@ const CarDetails = () => {
             }
         }
         fetchCarById()
-    }, [id])
+    }, [id, axios])
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -52,7 +52,13 @@ const CarDetails = () => {
             return
         }
 
+        if (returnDate && pickupDate && new Date(returnDate) <= new Date(pickupDate)) {
+            toast.error('Return date must be after pickup date')
+            return
+        }
+
         try {
+            setIsBooking(true)
             const { data } = await axios.post('/api/bookings/create', {
                 car: id,
                 pickupDate,
@@ -61,19 +67,36 @@ const CarDetails = () => {
 
             if (data.success) {
                 toast.success(data.message)
-                if (fetchCars) fetchCars()   // refresh cars so booked car is removed from listings
+                if (fetchCars) fetchCars()
                 navigate('/my-bookings')
             } else {
                 toast.error(data.message)
             }
         } catch (error) {
             toast.error(error.message)
+        } finally {
+            setIsBooking(false)
         }
     }
 
     if (loading) return <Loader />
 
-    return car ? (
+    if (!car) {
+        return (
+            <div className='flex flex-col items-center justify-center min-h-[60vh] text-center px-6'>
+                <p className='text-2xl font-semibold text-gray-700'>Car Not Found</p>
+                <p className='text-gray-400 mt-2 text-sm'>The car you are looking for does not exist or is no longer listed.</p>
+                <button
+                    onClick={() => navigate('/cars')}
+                    className='mt-6 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dull transition-all cursor-pointer font-medium'
+                >
+                    Browse Available Cars
+                </button>
+            </div>
+        )
+    }
+
+    return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -85,7 +108,7 @@ const CarDetails = () => {
                 animate={{ opacity: 1, x: 0 }}
                 whileHover={{ x: -4 }}
                 whileTap={{ scale: 0.96 }}
-                onClick={() => navigate(-1)}
+                onClick={() => navigate('/cars')}
                 className='flex items-center gap-2 mb-6 text-gray-500 cursor-pointer'
             >
                 <img
@@ -169,36 +192,6 @@ const CarDetails = () => {
                                 {car.description}
                             </p>
                         </div>
-
-                        <div>
-                            <h2 className='text-xl font-medium mb-3 text-gray-800'>
-                                Features
-                            </h2>
-
-                            <ul className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
-                                {[
-                                    "360 Camera",
-                                    "Bluetooth",
-                                    "GPS",
-                                    "Heated Seats",
-                                    "Rear View Mirror"
-                                ].map(item => (
-                                    <motion.li
-                                        key={item}
-                                        whileHover={{ x: 4 }}
-                                        transition={{ duration: 0.2 }}
-                                        className='flex items-center text-gray-600'
-                                    >
-                                        <img
-                                            src={assets.check_icon}
-                                            className='h-4 mr-2'
-                                            alt=""
-                                        />
-                                        {item}
-                                    </motion.li>
-                                ))}
-                            </ul>
-                        </div>
                     </div>
                 </motion.div>
 
@@ -226,7 +219,7 @@ const CarDetails = () => {
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => navigate('/owner/dashboard')}
+                            onClick={() => navigate('/owner')}
                             className='w-full border border-primary text-primary hover:bg-primary hover:text-white transition-all py-3 font-medium rounded-xl cursor-pointer'
                         >
                             Go to Dashboard
@@ -280,7 +273,7 @@ const CarDetails = () => {
                                 onChange={(e) => setReturnDate(e.target.value)}
                                 className='border border-borderColor px-3 py-2 rounded-lg text-gray-600 focus:outline-primary'
                                 required
-                                min={new Date().toISOString().split('T')[0]}
+                                min={pickupDate || new Date().toISOString().split('T')[0]}
                             />
                         </div>
 
@@ -289,9 +282,10 @@ const CarDetails = () => {
                             whileTap={{ scale: 0.98 }}
                             transition={{ type: "spring", stiffness: 400, damping: 20 }}
                             type="submit"
-                            className='w-full bg-primary hover:bg-primary-dull transition-all py-3 font-medium text-white rounded-xl cursor-pointer shadow-md'
+                            disabled={isBooking}
+                            className='w-full bg-primary hover:bg-primary-dull transition-all py-3 font-medium text-white rounded-xl cursor-pointer shadow-md disabled:opacity-60 disabled:cursor-not-allowed'
                         >
-                            Book Now
+                            {isBooking ? 'Booking...' : 'Book Now'}
                         </motion.button>
 
                         <p className='text-center text-sm text-gray-400'>
@@ -332,8 +326,6 @@ const CarDetails = () => {
             </div>
 
         </motion.div>
-    ) : (
-        <Loader />
     )
 }
 

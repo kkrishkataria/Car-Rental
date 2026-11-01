@@ -1,8 +1,14 @@
 
 import React from 'react'
 import { motion } from 'motion/react'
+import toast from 'react-hot-toast'
 
 const Newsletter = () => {
+    const handleSubscribe = (e) => {
+        e.preventDefault()
+        toast.success('Subscribed successfully! 🎉')
+        e.target.reset()
+    }
     return (
         <motion.div
             initial={{ opacity: 0, y: 35 }}
@@ -36,7 +42,7 @@ const Newsletter = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.25 }}
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={handleSubscribe}
                 className="flex items-center justify-between max-w-2xl w-full md:h-13 h-12 shadow-sm"
             >
                 <input

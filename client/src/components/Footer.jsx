@@ -1,10 +1,11 @@
 
 import React from 'react'
 import { assets } from '../assets/assets'
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
     return (
-        <div className='px-6 md:px-16 lg:px-24 xl:px-32 mt-60 text-sm text-gray-500'>
+        <div className='px-6 md:px-16 lg:px-24 xl:px-32 mt-20 text-sm text-gray-500'>
 
             <div className='flex flex-wrap justify-between items-start gap-8 pb-6 border-b border-borderColor'>
 
@@ -63,10 +64,10 @@ const Footer = () => {
                     </h2>
 
                     <ul className='mt-3 flex flex-col gap-1.5'>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">Browse Cars</a></li>
-                        <li><a href="#">List Your Car</a></li>
-                        <li><a href="#">About Us</a></li>
+                        <li><Link to="/" className='hover:text-primary transition-colors'>Home</Link></li>
+                        <li><Link to="/cars" className='hover:text-primary transition-colors'>Browse Cars</Link></li>
+                        <li><Link to="/my-bookings" className='hover:text-primary transition-colors'>My Bookings</Link></li>
+                        <li><a href="#about" className='hover:text-primary transition-colors'>About Us</a></li>
                     </ul>
                 </div>
 
@@ -102,7 +103,7 @@ const Footer = () => {
             <div className='flex flex-col md:flex-row gap-2 items-center justify-between py-5'>
 
                 <p>
-                    © {new Date().getFullYear()} Brand. All rights reserved.
+                    © {new Date().getFullYear()} CarRental. All rights reserved.
                 </p>
 
                 <ul className='flex items-center gap-4'>

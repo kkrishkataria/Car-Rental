@@ -73,7 +73,7 @@ const Navbar = () => {
                         : link.path
                     return (
                         <motion.div
-                            key={index}
+                            key={link.name}
                             whileHover={{ y: -2 }}
                             transition={{ duration: 0.15 }}
                         >
@@ -103,7 +103,7 @@ const Navbar = () => {
                         value={searchQuery}
                         onChange={handleSearchChange}
                         className="py-1.5 w-full bg-transparent outline-none placeholder-gray-500 text-gray-700"
-                        placeholder="Search products"
+                        placeholder="Search cars"
                     />
                     <motion.button
                         type="submit"

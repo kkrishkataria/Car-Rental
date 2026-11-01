@@ -1,29 +1,49 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { assets } from '../../assets/assets'
 import { UseAppContext } from '../../context/AppContext'
+import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+
 const AddCar = () => {
     const { axios, currency } = UseAppContext()
-
+    const navigate = useNavigate()
 
     const [image, setImage] = useState(null)
+    const [previewUrl, setPreviewUrl] = useState('')
 
     const [car, setCar] = useState({
         brand: '',
         model: '',
-        year: 0,
-        pricePerDay: 0,
+        year: '',
+        pricePerDay: '',
         category: '',
         transmission: '',
         fuel_type: '',
-        seating_capacity: 0,
+        seating_capacity: '',
         location: '',
         description: ''
     })
     const [isLoading, setIsLoading] = useState(false)
+
+    useEffect(() => {
+        if (!image) {
+            setPreviewUrl('')
+            return
+        }
+        const url = URL.createObjectURL(image)
+        setPreviewUrl(url)
+        return () => {
+            URL.revokeObjectURL(url)
+        }
+    }, [image])
+
     const onSubmitHandler = async (e) => {
         e.preventDefault()
-        if (isLoading) return null
+        if (isLoading) return
+        if (!image) {
+            toast.error('Please upload a car image')
+            return
+        }
         setIsLoading(true)
         try {
             const formData = new FormData()
@@ -32,25 +52,13 @@ const AddCar = () => {
             const { data } = await axios.post('/api/owner/add-car', formData)
             if (data.success) {
                 toast.success(data.message)
-                setImage(null)
-                setCar({
-                    brand: '',
-                    model: '',
-                    year: 0,
-                    pricePerDay: 0,
-                    category: '',
-                    transmission: '',
-                    fuel_type: '',
-                    seating_capacity: 0,
-                    location: '',
-                    description: ''
-                })
+                navigate('/owner/manage-cars')
+            } else {
+                toast.error(data.message)
             }
-            else toast.error(data.message)
         } catch (error) {
             toast.error(error.message)
-        }
-        finally{
+        } finally {
             setIsLoading(false)
         }
     }
@@ -68,19 +76,14 @@ const AddCar = () => {
                 onSubmit={onSubmitHandler}
                 className='flex flex-col gap-5 text-gray-500 text-sm mt-6 max-w-xl'
             >
-
                 <div className='flex flex-col gap-2'>
-                    <label htmlFor='car-image' className='flex items-center gap-3'>
+                    <label htmlFor='car-image' className='flex items-center gap-3 cursor-pointer'>
                         <img
-                            src={
-                                image
-                                    ? URL.createObjectURL(image)
-                                    : assets.upload_icon
-                            }
+                            src={previewUrl || assets.upload_icon}
                             alt=''
-                            className='h-16 w-28 object-contain rounded-md cursor-pointer'
+                            className='h-16 w-28 object-contain rounded-md border border-dashed border-gray-300 p-1'
                         />
-                        <span>Upload a picture of your car</span>
+                        <span>{image ? image.name : 'Upload a picture of your car *'}</span>
                     </label>
 
                     <input
@@ -91,7 +94,6 @@ const AddCar = () => {
                         onChange={(e) => setImage(e.target.files[0])}
                     />
                 </div>
-
 
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-5'>
                     <div className='flex flex-col gap-1'>
@@ -123,14 +125,15 @@ const AddCar = () => {
                     </div>
                 </div>
 
-
                 <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5'>
                     <div className='flex flex-col gap-1'>
                         <label>Year</label>
                         <input
                             type='number'
-                            placeholder='2025'
+                            placeholder='2024'
                             required
+                            min={1990}
+                            max={new Date().getFullYear() + 1}
                             className='px-3 py-2 border border-borderColor rounded-md outline-none'
                             value={car.year}
                             onChange={(e) =>
@@ -145,6 +148,8 @@ const AddCar = () => {
                             type='number'
                             placeholder='100'
                             required
+                            min={1}
+                            max={100000}
                             className='px-3 py-2 border border-borderColor rounded-md outline-none'
                             value={car.pricePerDay}
                             onChange={(e) =>
@@ -173,7 +178,6 @@ const AddCar = () => {
                     </div>
                 </div>
 
-
                 <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5'>
                     <div className='flex flex-col gap-1'>
                         <label>Transmission</label>
@@ -188,6 +192,7 @@ const AddCar = () => {
                             <option value=''>Select a transmission</option>
                             <option value='Automatic'>Automatic</option>
                             <option value='Manual'>Manual</option>
+                            <option value='Semi-Automatic'>Semi-Automatic</option>
                         </select>
                     </div>
 
@@ -215,6 +220,7 @@ const AddCar = () => {
                             type='number'
                             placeholder='5'
                             min={1}
+                            max={20}
                             required
                             className='px-3 py-2 border border-borderColor rounded-md outline-none'
                             value={car.seating_capacity}
@@ -227,7 +233,6 @@ const AddCar = () => {
                         />
                     </div>
                 </div>
-
 
                 <div className='flex flex-col gap-1'>
                     <label>Location</label>
@@ -247,7 +252,6 @@ const AddCar = () => {
                     </select>
                 </div>
 
-
                 <div className='flex flex-col gap-1'>
                     <label>Description</label>
                     <textarea
@@ -262,13 +266,13 @@ const AddCar = () => {
                     />
                 </div>
 
-
                 <button
                     type='submit'
-                    className='flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dull text-white rounded-md w-fit cursor-pointer'
+                    disabled={isLoading}
+                    className='flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dull text-white rounded-md w-fit cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed'
                 >
                     <img src={assets.tick_icon} alt='' className='w-4' />
-                    {isLoading?'Listing...':'List Your Car'}
+                    {isLoading ? 'Listing...' : 'List Your Car'}
                 </button>
             </form>
         </div>

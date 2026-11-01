@@ -1,4 +1,5 @@
 import React from 'react'
+import { motion } from 'motion/react'
 import { assets } from '../assets/assets.js'
 import Title from './Title'
 
@@ -26,8 +27,6 @@ const testimonials = [
     }
 ]
 
-import { motion } from 'motion/react'
-
 const Testimonial = () => {
     return (
         <motion.div
@@ -39,13 +38,13 @@ const Testimonial = () => {
         >
             <Title
                 title="What Our Customers Say"
-                subTitle="Discover why discerning travelers choose StayVenture for their luxury accommodations around the world."
+                subTitle="Discover why thousands of customers choose CarRental for their luxury driving experience."
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-18">
-                {testimonials.map((testimonial, index) => (
+                {testimonials.map((testimonial) => (
                     <motion.div
-                        key={index}
+                        key={testimonial.name}
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, amount: 0.2 }}

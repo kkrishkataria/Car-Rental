@@ -3,22 +3,29 @@ import { UseAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
 
 const Login = () => {
-    const {setShowLogin,axios,setToken,navigate}=UseAppContext()
+    const {setShowLogin,axios,setToken,navigate,setIsOwner}=UseAppContext()
     const [state, setState] = React.useState("login");
     const [name, setName] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [role, setRole] = React.useState("user");
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const onSubmitHandler = async (event) => {
+        event.preventDefault();
+        if (isLoading) return;
+        setIsLoading(true);
         try {
-            event.preventDefault();
             const {data}=await axios.post(`api/user/${state}`,{name,email,password,role})
             if(data.success){
-                navigate('/')
+                navigate(data.role === 'owner' ? '/owner' : '/')
                 axios.defaults.headers.common['Authorization']=data.token
                 setToken(data.token)
                 localStorage.setItem('token',data.token)
+                if(data.role){
+                    localStorage.setItem('role',data.role)
+                    setIsOwner(data.role === 'owner')
+                }
                 setShowLogin(false)
             }
             else {
@@ -26,6 +33,8 @@ const Login = () => {
             }
         } catch (error) {
             toast.error(error.message)
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -40,7 +49,6 @@ const Login = () => {
                 className="flex flex-col gap-4 m-auto items-start p-8 py-12 w-80 sm:w-[352px] rounded-lg shadow-xl border border-gray-200 bg-white"
             >
                 <p className="text-2xl font-medium m-auto">
-                    <span className="text-primary">User</span>{" "}
                     {state === "login" ? "Login" : "Sign Up"}
                 </p>
 
@@ -100,6 +108,7 @@ const Login = () => {
                         placeholder="type here"
                         className="border border-gray-200 rounded w-full p-2 mt-1 outline-blue-500"
                         type="password"
+                        minLength={8}
                         required
                     />
                 </div>
@@ -126,8 +135,11 @@ const Login = () => {
                     </p>
                 )}
 
-                <button className="bg-primary hover:bg-blue-800 transition-all text-white w-full py-2 rounded-md cursor-pointer">
-                    {state === "register" ? "Create Account" : "Login"}
+                <button
+                    disabled={isLoading}
+                    className="bg-primary hover:bg-blue-800 transition-all text-white w-full py-2 rounded-md cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                    {isLoading ? "Please wait..." : (state === "register" ? "Create Account" : "Login")}
                 </button>
             </form>
         </div>

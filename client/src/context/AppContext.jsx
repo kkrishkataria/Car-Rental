@@ -9,9 +9,9 @@ export const AppContext=createContext()
 export const AppProvider=({children})=>{
     const currency=import.meta.env.VITE_CURRENCY
     const navigate=useNavigate()
-    const [token,setToken]=useState(null)
+    const [token,setToken]=useState(localStorage.getItem('token') || null)
     const [user,setUser]=useState(null)
-    const [isOwner,setIsOwner]=useState(false)
+    const [isOwner,setIsOwner]=useState(localStorage.getItem('role') === 'owner')
     const [showLogin,setShowLogin]=useState(false)
     const [pickupDate,setPickupDate]=useState('')
     const [returnDate,setReturnDate]=useState('')
@@ -21,14 +21,14 @@ export const AppProvider=({children})=>{
             const {data}=await axios.get('/api/user/data')
             if(data.success && data.user){
                 setUser(data.user)
-                setIsOwner(data.user.role==='owner')
-            }
-            else {
-                navigate('/')
+                const isUserOwner = data.user.role === 'owner'
+                setIsOwner(isUserOwner)
+                localStorage.setItem('role', data.user.role)
             }
         } catch (error) {
             if (error.response?.status === 401) {
                 localStorage.removeItem('token')
+                localStorage.removeItem('role')
                 setToken(null)
                 setUser(null)
                 setIsOwner(false)
@@ -55,10 +55,12 @@ export const AppProvider=({children})=>{
 
     const logout=async()=>{
         localStorage.removeItem('token')
+        localStorage.removeItem('role')
         setToken(null)
         setUser(null)
         setIsOwner(false)
         axios.defaults.headers.common['Authorization']=''
+        navigate('/')
         toast.success('You have been logged out!')
     }
 
