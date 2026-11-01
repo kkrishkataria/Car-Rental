@@ -35,9 +35,11 @@ const CarCard = ({ car }) => {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 }}
-                    className='absolute top-4 left-4 bg-primary/90 text-white text-xs px-2.5 py-1 rounded-full'
+                    className='absolute top-4 left-4 bg-primary/90 text-white text-xs px-2.5 py-1 rounded-full shadow-sm'
                 >
-                    Available Now
+                    {car.availableFrom && car.availableTo
+                        ? `${new Date(car.availableFrom).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${new Date(car.availableTo).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
+                        : 'Available Now'}
                 </motion.p>
 
                 <div className='absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm text-white px-3 py-2 rounded-lg'>

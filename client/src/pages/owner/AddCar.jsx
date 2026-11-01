@@ -21,7 +21,9 @@ const AddCar = () => {
         fuel_type: '',
         seating_capacity: '',
         location: '',
-        description: ''
+        description: '',
+        availableFrom: '',
+        availableTo: ''
     })
     const [isLoading, setIsLoading] = useState(false)
 
@@ -42,6 +44,10 @@ const AddCar = () => {
         if (isLoading) return
         if (!image) {
             toast.error('Please upload a car image')
+            return
+        }
+        if (car.availableFrom && car.availableTo && new Date(car.availableTo) < new Date(car.availableFrom)) {
+            toast.error('Available Until date must be on or after Available From date')
             return
         }
         setIsLoading(true)
@@ -250,6 +256,37 @@ const AddCar = () => {
                         <option value='Houston'>Houston</option>
                         <option value='Chicago'>Chicago</option>
                     </select>
+                </div>
+
+                <div className='flex flex-col gap-1'>
+                    <label className='font-medium text-gray-700'>Availability Window (Span of Days)</label>
+                    <p className='text-xs text-gray-400'>Specify the date span when this car is available for booking (leave blank if always available).</p>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-5 mt-1'>
+                        <div className='flex flex-col gap-1'>
+                            <label className='text-xs text-gray-500'>Available From</label>
+                            <input
+                                type='date'
+                                min={new Date().toISOString().split('T')[0]}
+                                className='px-3 py-2 border border-borderColor rounded-md outline-none bg-white'
+                                value={car.availableFrom}
+                                onChange={(e) =>
+                                    setCar({ ...car, availableFrom: e.target.value })
+                                }
+                            />
+                        </div>
+                        <div className='flex flex-col gap-1'>
+                            <label className='text-xs text-gray-500'>Available Until</label>
+                            <input
+                                type='date'
+                                min={car.availableFrom || new Date().toISOString().split('T')[0]}
+                                className='px-3 py-2 border border-borderColor rounded-md outline-none bg-white'
+                                value={car.availableTo}
+                                onChange={(e) =>
+                                    setCar({ ...car, availableTo: e.target.value })
+                                }
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className='flex flex-col gap-1'>

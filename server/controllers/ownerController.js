@@ -39,7 +39,9 @@ export const addCar = async (req, res) => {
             fuel_type: rawCar.fuel_type,
             seating_capacity: rawCar.seating_capacity,
             location: rawCar.location,
-            description: rawCar.description
+            description: rawCar.description,
+            availableFrom: rawCar.availableFrom ? new Date(rawCar.availableFrom) : null,
+            availableTo: rawCar.availableTo ? new Date(rawCar.availableTo) : null
         }
         await Car.create({...car,owner:_id,image})
         return res.json({success:true,message:"Car Added!"})

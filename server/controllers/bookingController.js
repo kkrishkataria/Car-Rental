@@ -19,10 +19,28 @@ export const checkAvalabilityOfCar=async(req,res)=>{
             pickupDate: { $lte: returnDate },
             returnDate: { $gte: pickupDate }
         }).distinct("car");
-        const cars=await Car.find({
+        const reqPickup = new Date(pickupDate)
+        const reqReturn = new Date(returnDate)
+        const cars = await Car.find({
             _id: { $nin: bookedCarIds },
             location,
-            isAvailable:true
+            isAvailable: true,
+            $and: [
+                {
+                    $or: [
+                        { availableFrom: null },
+                        { availableFrom: { $exists: false } },
+                        { availableFrom: { $lte: reqPickup } }
+                    ]
+                },
+                {
+                    $or: [
+                        { availableTo: null },
+                        { availableTo: { $exists: false } },
+                        { availableTo: { $gte: reqReturn } }
+                    ]
+                }
+            ]
         })
         const availableCars=await Promise.all(
             cars.map(async (car) => ({
@@ -61,6 +79,12 @@ export const createBooking=async(req,res)=>{
         if (!carData || !carData.isAvailable) return res.json({ success: false, message: 'Car is Not Available!' })
         const picked=new Date(pickupDate)
         const returned=new Date(returnDate)
+        if (carData.availableFrom && picked < new Date(carData.availableFrom)) {
+            return res.json({ success: false, message: `Car is only available from ${new Date(carData.availableFrom).toISOString().split('T')[0]}` })
+        }
+        if (carData.availableTo && returned > new Date(carData.availableTo)) {
+            return res.json({ success: false, message: `Car is only available until ${new Date(carData.availableTo).toISOString().split('T')[0]}` })
+        }
         const noOfDays=Math.max(1, Math.ceil((returned-picked)/(1000*60*60*24)))
         const price=carData.pricePerDay*noOfDays
         await Booking.create({user:_id,car,owner:carData.owner,pickupDate,returnDate,price})
