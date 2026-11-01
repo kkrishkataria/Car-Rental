@@ -209,11 +209,9 @@ export const getDashboardData = async (req, res) => {
         const pendingbookings=await Booking.find({owner:_id,status:"pending"}).populate("car").sort({createdAt:-1})
         const confirmedbookings=await Booking.find({owner:_id,status:"confirmed"}).populate("car").sort({createdAt:-1})
 
-        const now = new Date()
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
         const monthlyRevenue = bookings
-            .filter(b => b.status === "confirmed" && new Date(b.createdAt) >= startOfMonth)
-            .reduce((acc, booking) => acc + booking.price, 0)
+            .filter(b => b.status === "confirmed")
+            .reduce((acc, booking) => acc + (Number(booking.price) || 0), 0)
 
         const dashboardData={
             totalCars:cars.length,
