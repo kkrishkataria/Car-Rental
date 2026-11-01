@@ -10,8 +10,9 @@ export const addCar = async (req, res) => {
         if (role !== 'owner') {
             return res.json({ success: false, message: "Unauthorized" })
         }
-        let car = JSON.parse(req.body.carData)
- 
+        if (!req.file) {
+            return res.json({ success: false, message: "Car image is required" })
+        }
         const imageFile = req.file
         const filebuffer = fs.readFileSync(imageFile.path)
         const uploadResponse = await imagekit.upload({ file: filebuffer, fileName: imageFile.originalname, folder: '/cars' })
@@ -27,6 +28,19 @@ export const addCar = async (req, res) => {
         });
 
         const image = optimizedImageUrl;
+        const rawCar = JSON.parse(req.body.carData)
+        const car = {
+            brand: rawCar.brand,
+            model: rawCar.model,
+            year: rawCar.year,
+            pricePerDay: rawCar.pricePerDay,
+            category: rawCar.category,
+            transmission: rawCar.transmission,
+            fuel_type: rawCar.fuel_type,
+            seating_capacity: rawCar.seating_capacity,
+            location: rawCar.location,
+            description: rawCar.description
+        }
         await Car.create({...car,owner:_id,image})
         return res.json({success:true,message:"Car Added!"})
 
@@ -162,6 +176,7 @@ export const deleteCar = async (req, res) => {
             });
         }
 
+        await Booking.deleteMany({ car: carId });
         await Car.findByIdAndDelete(carId);
 
         res.json({
@@ -194,7 +209,11 @@ export const getDashboardData = async (req, res) => {
         const pendingbookings=await Booking.find({owner:_id,status:"pending"}).populate("car").sort({createdAt:-1})
         const confirmedbookings=await Booking.find({owner:_id,status:"confirmed"}).populate("car").sort({createdAt:-1})
 
-        const monthlyRevenue=bookings.slice().filter(bookings=>bookings.status==="confirmed").reduce((acc,booking)=>acc+booking.price,0)
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        const monthlyRevenue = bookings
+            .filter(b => b.status === "confirmed" && new Date(b.createdAt) >= startOfMonth)
+            .reduce((acc, booking) => acc + booking.price, 0)
 
         const dashboardData={
             totalCars:cars.length,
@@ -221,6 +240,9 @@ export const getDashboardData = async (req, res) => {
 export const updateUserImage=async(req,res)=>{
     try {
         const {_id}=req.user
+        if (!req.file) {
+            return res.json({ success: false, message: "Image file is required" })
+        }
         const imageFile=req.file
         const filebuffer = fs.readFileSync(imageFile.path)
         const uploadResponse = await imagekit.upload({ file: filebuffer, fileName: imageFile.originalname, folder: '/users' })

@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken"
 
 const generateToken=(userId)=>{
     const payload={"id":userId}
-    return jwt.sign(payload,process.env.JWT_SECRET)
+    return jwt.sign(payload,process.env.JWT_SECRET,{ expiresIn: '7d' })
 }
 
 export const registerUser=async(req,res)=>{
@@ -17,7 +17,7 @@ export const registerUser=async(req,res)=>{
         const hashedpassword=await bcrypt.hash(password,10)
         const user=await User.create({email,name,password:hashedpassword,role})
         const token=generateToken(user._id)
-        return res.json({success:true,token})
+        return res.json({success:true,token,role:user.role})
     } catch (error) {
         console.log(error.message)
         return res.json({success:false,message:error.message})
@@ -29,10 +29,10 @@ export const loginUser=async(req,res)=>{
         const {email,password}=req.body
         const user=await User.findOne({email})
         if(!user) return res.json({success:false,message:"User Not Found!"})
-        const isMatch=bcrypt.compare(password,user.password)
+        const isMatch=await bcrypt.compare(password,user.password)
         if(!isMatch) return res.json({success:false,message:"Invalid Credentials!"})
         const token=generateToken(user._id)
-        return res.json({success:true,token})
+        return res.json({success:true,token,role:user.role})
         
     } catch (error) {
         console.log(error.message)

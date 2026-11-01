@@ -15,7 +15,9 @@ export const checkAvalabilityOfCar=async(req,res)=>{
     try {
         const {location,pickupDate,returnDate}=req.body
         const bookedCarIds = await Booking.find({
-            status: { $in: ["confirmed", "pending"] }
+            status: { $in: ["confirmed", "pending"] },
+            pickupDate: { $lte: returnDate },
+            returnDate: { $gte: pickupDate }
         }).distinct("car");
         const cars=await Car.find({
             _id: { $nin: bookedCarIds },
@@ -48,6 +50,9 @@ export const createBooking=async(req,res)=>{
         const {_id, role}=req.user
         if (role === 'owner') return res.json({ success: false, message: 'Owners cannot book cars.' })
         const {car,pickupDate,returnDate}=req.body
+        if (new Date(returnDate) <= new Date(pickupDate)) {
+            return res.json({ success: false, message: 'Return date must be after pickup date' })
+        }
         const isConfirmedBooked = await Booking.exists({ car, status: 'confirmed' });
         if (isConfirmedBooked) return res.json({ success: false, message: 'This car is already confirmed booked!' })
         const isAvailable=await checkAvalabilityOfDate(car,pickupDate,returnDate)
@@ -56,7 +61,7 @@ export const createBooking=async(req,res)=>{
         if (!carData || !carData.isAvailable) return res.json({ success: false, message: 'Car is Not Available!' })
         const picked=new Date(pickupDate)
         const returned=new Date(returnDate)
-        const noOfDays=Math.ceil((returned-picked)/(1000*60*60*24))
+        const noOfDays=Math.max(1, Math.ceil((returned-picked)/(1000*60*60*24)))
         const price=carData.pricePerDay*noOfDays
         await Booking.create({user:_id,car,owner:carData.owner,pickupDate,returnDate,price})
         return res.json({success:true,message:'Booking Created!'})
@@ -84,7 +89,7 @@ export const getOwnerBookings=async(req,res)=>{
     try {
         if(req.user.role!=="owner") return res.json({success:false,message:"Unauthorized"})
         const {_id}=req.user
-        const bookings=await Booking.find({owner:_id}).populate("car user").select('-user.password').sort({createdAt:-1})
+        const bookings=await Booking.find({owner:_id}).populate("car").populate("user", "-password").sort({createdAt:-1})
         return res.json({success:true,bookings})
         
     } catch (error) {
