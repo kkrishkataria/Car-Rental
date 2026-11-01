@@ -2,9 +2,11 @@ import React from 'react'
 import { motion } from 'motion/react'
 import { assets } from '../assets/assets.js'
 import { useNavigate } from 'react-router-dom'
+import { UseAppContext } from '../context/AppContext.jsx'
 
 const CarCard = ({ car }) => {
-    const currency = import.meta.env.VITE_CURRENCY
+    const appContext = UseAppContext()
+    const currency = appContext?.currency || ((import.meta.env.VITE_CURRENCY && import.meta.env.VITE_CURRENCY !== '$') ? import.meta.env.VITE_CURRENCY : '₹')
     const navigate = useNavigate()
 
     return (

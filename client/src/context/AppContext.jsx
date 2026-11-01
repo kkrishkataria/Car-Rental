@@ -7,7 +7,7 @@ axios.defaults.baseURL=import.meta.env.VITE_BASE_URL
 
 export const AppContext=createContext()
 export const AppProvider=({children})=>{
-    const currency=import.meta.env.VITE_CURRENCY
+    const currency = (import.meta.env.VITE_CURRENCY && import.meta.env.VITE_CURRENCY !== '$') ? import.meta.env.VITE_CURRENCY : '₹'
     const navigate=useNavigate()
     const [token,setToken]=useState(localStorage.getItem('token') || null)
     const [user,setUser]=useState(null)
