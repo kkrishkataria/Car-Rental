@@ -45,7 +45,7 @@ A modern, full-stack car rental web application built with **React, Vite, Tailwi
 * **Database**: MongoDB Atlas with Mongoose ODM
 * **Authentication**: JSON Web Tokens (JWT) + Bcrypt password hashing
 * **Media Storage & CDN**: ImageKit + Multer (file buffer upload and WebP auto-compression)
-* **Hosting**: Render
+* **Hosting**: Vercel
 
 ---
 
@@ -140,7 +140,7 @@ cd Car-Rental
    VITE_BASE_URL=http://localhost:5000/
    VITE_CURRENCY=₹
    ```
-   *(For production, point `VITE_BASE_URL` to your deployed backend, e.g. on Render).*
+   *(For production, point `VITE_BASE_URL` to your deployed backend on Vercel).*
 
 3. Start the Vite dev server:
    ```bash
@@ -182,16 +182,21 @@ cd Car-Rental
 2. Set **Root Directory** to `client`.
 3. Set **Framework Preset** to `Vite`.
 4. Add Environment Variables:
-   * `VITE_BASE_URL`: URL of your deployed backend (e.g. `https://your-api.onrender.com/`)
+   * `VITE_BASE_URL`: URL of your deployed backend on Vercel
    * `VITE_CURRENCY`: `₹`
 5. Deploy. SPA rewrites are handled automatically via `client/vercel.json`.
 
-### Backend (Render)
-1. Create a **Web Service** on [Render](https://render.com) connected to the GitHub repository.
+### Backend (Vercel)
+1. Import repository on [Vercel](https://vercel.com) (or deploy via Vercel CLI).
 2. Set **Root Directory** to `server`.
-3. Set **Build Command**: `npm install`.
-4. Set **Start Command**: `npm start`.
-5. Add backend environment variables (`MONGODB_URI`, `JWT_SECRET`, `IMAGEKIT_*`, `CLIENT_URL`).
+3. Add backend environment variables:
+   * `MONGODB_URI`
+   * `JWT_SECRET`
+   * `IMAGEKIT_PUBLIC_KEY`
+   * `IMAGEKIT_PRIVATE_KEY`
+   * `IMAGEKIT_URL_ENDPOINT`
+   * `CLIENT_URL`
+4. Deploy.
 
 ---
 
